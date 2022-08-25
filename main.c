@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <windows.h>
+
+char *suites[3] = {"Precedential Suite", "Royal Suite", "Family Suite"};
+float suitePrices[3] = {10999, 8499, 5999}; // Precedential Suite, Royal Suite, Family Suite
+int roomBooking(int nic);
 
 void header()
 {
@@ -10,7 +15,6 @@ void header()
 
 void welcomeMsg()
 {
-    char any;
     header();
     system("color 03");
     printf("\t\t\t");
@@ -24,14 +28,13 @@ void welcomeMsg()
     system("color 0f");
     time_t t = time(NULL);
     printf("\n%s", ctime(&t));
-    printf("\nEnter any key to continue.....");
-    scanf("%c", &any);
-    // exit(1);
-    system("cls");
+    system("pause");
+    // system("cls");
 }
 
 int loginScrn()
 {
+    system("cls");
     int login = 0;
     header();
     printf("\t\t");
@@ -45,13 +48,23 @@ int loginScrn()
 
     // condition ? true : false;
     login == 3 ? exit(1) : system("cls");
-    login != 1 && login != 2 ? loginScrn() : system("cls");
-    return login;
+    if (login != 1 && login != 2)
+    {
+        printf("Invalid login type.\n");
+        Sleep(300);
+        system("cls");
+        loginScrn();
+    }
+    else
+    {
+        return login;
+    }
 }
 
-void receptionistLogin()
+int receptionistLogin()
 {
     int Rid, fRid;
+    int LoginSuccess = 0; // 0 = false, 1 = true
     char pass[10], fpass[10];
     FILE *db = fopen("db.txt", "r");
     header();
@@ -65,38 +78,257 @@ void receptionistLogin()
         fscanf(db, "%d:%s", &fRid, &fpass);
         if (Rid == fRid && strcmp(pass, fpass) == 0)
         {
-            printf("\n\tLogin Successful\n");
-            system("pause");
-            system("cls");
+            return 1;
+        }
+    }
+    return 0;
+}
 
+int receptionistScrn()
+{
+    system("cls");
+    header();
+    int choice;
+
+    printf("\t\t[1]: Check In\n");
+    printf("\t\t[2]: Check Out\n");
+    printf("\t\t[3]: Update\n");
+    printf("\t\t[4]: Exit\n");
+    printf("\t\tEnter your choice: ");
+    scanf("%d", &choice);
+    return choice;
+}
+
+void checkIn()
+{
+    struct details
+    {
+        // char nic[10];
+        int nic;
+        char name[20];
+        char address[30];
+        int phone;
+        char email[20];
+        char room[10];
+        char checkIn[10];
+        char checkOut[10];
+    } customer, fcustomer;
+    FILE *customerDB = fopen("customerDB.txt", "r");
+
+    printf("\t\tCheck In\n\n");
+    printf("\tEnter customer NIC or passport: ");
+    scanf("%d", &customer.nic);
+    // read to check if customer is already in the database
+    while (!feof(customerDB))
+    {
+        fscanf(customerDB, "%d : %s : %s : %s : %s\n", &fcustomer.nic, &fcustomer.name, &fcustomer.address, &fcustomer.phone, &fcustomer.email);
+        fflush(stdin);
+        // if (strcmp(customer.nic, fcustomer.nic) == 0)
+        if (customer.nic == fcustomer.nic)
+        {
+            printf("\n\tCustomer is already in the database.\n");
+            printf("\tName: %s\n", fcustomer.name);
+            printf("\tAddress: %s\n", fcustomer.address);
+            printf("\tPhone: %d\n", fcustomer.phone);
+            printf("\tEmail: %s\n", fcustomer.email);
+            printf("\n\tDo you want to update the details? [Y/N]: ");
+            char choice;
+            scanf("%c", &choice);
+            if (choice == 'Y' || choice == 'y')
+            {
+                printf("\n\tEnter new details:\n");
+                printf("\tName: ");
+                scanf("%s", &customer.name);
+                printf("\tAddress: ");
+                scanf("%s", &customer.address);
+                printf("\tPhone: ");
+                scanf("%d", &customer.phone);
+                printf("\tEmail: ");
+                scanf("%s", &customer.email);
+                fclose(customerDB);
+                // customerDB = fopen("customerDB.txt", "w");
+                /*
+                TODO: update the database
+                */
+            }
+            else
+            {
+                printf("\n\tCustomer details not updated.\n");
+                fclose(customerDB);
+                // customerDB = fopen("customerDB.txt", "w");
+            }
+            goto Addpkg;
             break;
         }
-        // else
-        // {
-        //     printf("\n\tLogin Failed\n");
-        //     printf(fpass, fRid);
-        //     system("pause");
-        //     system("cls");
-        //     receptionistLogin();
-        // }
     }
-    printf("\n\tLogin Failed\n");
-    printf(fpass, fRid);
-    system("pause");
+    printf("\n\tCustomer is not in the database.\n");
+    fclose(customerDB);
+    printf("\tEnter customer details:\n");
+    printf("\tName: ");
+    scanf("%s", &customer.name);
+    printf("\tAddress: ");
+    scanf("%s", &customer.address);
+    printf("\tPhone: ");
+    scanf("%d", &customer.phone);
+    printf("\tEmail: ");
+    scanf("%s", &customer.email);
+
+    customerDB = fopen("customerDB.txt", "a");
+    fprintf(customerDB, "%d : %s : %s : %d : %s\n", customer.nic, customer.name, customer.address, customer.phone, customer.email);
+
+Addpkg:
+    printf("\n\t[1]: Room booking\n");
+    printf("\t[2]: Dining\n");
+    printf("\n\tChoose: ");
+    int pkgchoice;
+    scanf("%d", &pkgchoice);
+    switch (pkgchoice)
+    {
+    case 1:
+        // handle room booking
+        roomBooking(customer.nic);
+        break;
+    case 2:
+        // handle dining
+        break;
+    default:
+        printf("\n\tInvalid choice.\n");
+        goto Addpkg;
+    }
+}
+
+int roomBooking(int nic)
+{
+    char choice;
+    int suiteChoice;
+roomBooking:
     system("cls");
-    receptionistLogin();
+    header();
+    printf("\t\tRoom Booking\n\n");
+    printf("\t     Suite Type \t\t Price \t\t\t Capacity\n");
+    printf("\t[1]: Presidential suite \t %.2f /night \t 02\n", suitePrices[0]);
+    printf("\t[2]: Royal suite \t\t %.2f /night \t 03\n", suitePrices[1]);
+    printf("\t[3]: Family suite \t\t %.2f /night \t 05\n", suitePrices[2]);
+    fflush(stdin);
+    printf("\n\tchoice: ");
+    scanf("%d", &suiteChoice);
+    switch (suiteChoice)
+    {
+    case 1:
+        printf("\n\t\tPresidential suite.\n");
+        printf("\tPrice: %.2f\n", suitePrices[0]);
+        printf("\tCapacity: 02\n\n");
+
+        printf("\tDo you want to book this suite? [Y/N]: ");
+        scanf(" %c", &choice);
+        if (choice == 'Y' || choice == 'y')
+        {
+            printf("\n\tBooking successful.\n");
+        }
+        else
+        {
+            goto roomBooking;
+        }
+        break;
+
+    case 2:
+        printf("\n\t\tRoyal suite.\n");
+        printf("\tPrice: %.2f\n", suitePrices[1]);
+        printf("\tCapacity: 03\n\n");
+
+        printf("\tDo you want to book this suite? [Y/N]: ");
+        scanf(" %c", &choice);
+        if (choice == 'Y' || choice == 'y')
+        {
+            printf("\n\tBooking successful.\n");
+        }
+        else
+        {
+            goto roomBooking;
+        }
+        break;
+    case 3:
+        printf("\n\t\tFamily suite.\n");
+        printf("\tPrice: %.2f\n", suitePrices[2]);
+        printf("\tCapacity: 05\n\n");
+
+        printf("\tDo you want to book this suite? [Y/N]: ");
+        scanf(" %c", &choice);
+        if (choice == 'Y' || choice == 'y')
+        {
+            printf("\n\tBooking successful.\n");
+        }
+        else
+        {
+            goto roomBooking;
+        }
+        break;
+    default:
+        printf("\n\tInvalid choice.\n");
+        goto roomBooking;
+    }
+
+    int days;
+    FILE *bookingDB = fopen("bookingDB.txt", "a");
+    printf("How long do you wish to stay: ");
+    scanf("%d", &days);
+    fprintf(bookingDB, "%d : %s : %d : %.2f\n", nic, suites[suiteChoice - 1], days, suitePrices[suiteChoice - 1] * days);
 }
 
 int main()
 {
     welcomeMsg();
     int loginChoice = loginScrn();
+
+    // Receptionist Login
     if (loginChoice == 1)
     {
-        receptionistLogin();
+    receptionistLogin:
+        if (receptionistLogin())
+        {
+            printf("\n\t\tLogin Successful\n");
+            int choice = receptionistScrn();
+            switch (choice)
+            {
+            case 1:
+                // Check In
+                checkIn();
+                break;
+            case 2:
+                // Check Out
+                break;
+            case 3:
+                // Update
+                break;
+            case 4:
+                // Exit
+                loginScrn();
+                break;
+            default:
+                printf("Invalid choice.\n");
+                Sleep(300);
+                system("cls");
+                receptionistScrn();
+            }
+        }
+        else
+        {
+
+            system("color 04");
+            printf("\n\t\tLogin Failed\n");
+            printf("\n\t\tPlease try again\n");
+            system("pause");
+            system("color 0f");
+            system("cls");
+            goto receptionistLogin;
+        }
     }
+    // Manager Login
     else if (loginChoice == 2)
     {
         printf("\n\t\tManager Login\n\n");
+        /*
+        TODO: Manager Login
+        */
     }
 }
