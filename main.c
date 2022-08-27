@@ -4,9 +4,19 @@
 #include <string.h>
 #include <windows.h>
 
+struct details
+{
+    // char nic[10];
+    char nic[13];
+    char name[50];
+    char address[50];
+    char phone[14];
+    char email[40];
+    char room[10];
+} customer, fcustomer;
 char *suites[3] = {"Precedential Suite", "Royal Suite", "Family Suite"};
 float suitePrices[3] = {10999, 8499, 5999}; // Precedential Suite, Royal Suite, Family Suite
-int roomBooking(int nic);
+int roomBooking();
 
 void header()
 {
@@ -99,57 +109,69 @@ int receptionistScrn()
     return choice;
 }
 
+void customerUpdate()
+{
+    printf("\n\tEnter new details:\n");
+    printf("\tName: ");
+    scanf("%s", &customer.name);
+    printf("\tAddress: ");
+    scanf("%s", &customer.address);
+    printf("\tPhone: ");
+    scanf("%s", &customer.phone);
+    printf("\tEmail: ");
+    scanf("%s", &customer.email);
+    FILE *customerDB = fopen("customerDB.csv", "r");
+    FILE *temp;
+    int line = 0;
+    temp = fopen("temp.csv", "a");
+    while (feof(customerDB) == 0)
+    {
+        fscanf(customerDB, "%12[^,],%49[^,],%49[^,],%13[^,],%39[^\n]\n", &fcustomer.nic, &fcustomer.name, &fcustomer.address, &fcustomer.phone, &fcustomer.email);
+        fflush(stdin);
+        // fprintf(temp, "%s,%s,%s,%s,%s\n", fcustomer.nic, fcustomer.name, fcustomer.address, fcustomer.phone, fcustomer.email);
+        if (strcmp(customer.nic, fcustomer.nic) == 0)
+        {
+            fprintf(temp, "%s,%s,%s,%s,%s\n", customer.nic, customer.name, customer.address, customer.phone, customer.email);
+        }
+        else
+        {
+            fprintf(temp, "%s,%s,%s,%s,%s\n", fcustomer.nic, fcustomer.name, fcustomer.address, fcustomer.phone, fcustomer.email);
+        }
+    }
+    fclose(customerDB);
+    fclose(temp);
+    remove("customerDB.csv");
+    rename("temp.csv", "customerDB.csv");
+}
+
 void checkIn()
 {
-    struct details
-    {
-        // char nic[10];
-        int nic;
-        char name[20];
-        char address[30];
-        int phone;
-        char email[20];
-        char room[10];
-        char checkIn[10];
-        char checkOut[10];
-    } customer, fcustomer;
-    FILE *customerDB = fopen("customerDB.txt", "r");
+
+    FILE *customerDB = fopen("customerDB.csv", "a+");
 
     printf("\t\tCheck In\n\n");
     printf("\tEnter customer NIC or passport: ");
-    scanf("%d", &customer.nic);
+    scanf("%s", &customer.nic);
     // read to check if customer is already in the database
-    while (!feof(customerDB))
+    while (feof(customerDB) == 0)
     {
-        fscanf(customerDB, "%d : %s : %s : %s : %s\n", &fcustomer.nic, &fcustomer.name, &fcustomer.address, &fcustomer.phone, &fcustomer.email);
+        fscanf(customerDB, "%12[^,],%49[^,],%49[^,],%13[^,],%39[^\n]\n", &fcustomer.nic, &fcustomer.name, &fcustomer.address, &fcustomer.phone, &fcustomer.email);
         fflush(stdin);
-        // if (strcmp(customer.nic, fcustomer.nic) == 0)
-        if (customer.nic == fcustomer.nic)
+        if (strcmp(customer.nic, fcustomer.nic) == 0)
         {
             printf("\n\tCustomer is already in the database.\n");
             printf("\tName: %s\n", fcustomer.name);
             printf("\tAddress: %s\n", fcustomer.address);
-            printf("\tPhone: %d\n", fcustomer.phone);
+            printf("\tPhone: %s\n", fcustomer.phone);
             printf("\tEmail: %s\n", fcustomer.email);
             printf("\n\tDo you want to update the details? [Y/N]: ");
             char choice;
             scanf("%c", &choice);
             if (choice == 'Y' || choice == 'y')
             {
-                printf("\n\tEnter new details:\n");
-                printf("\tName: ");
-                scanf("%s", &customer.name);
-                printf("\tAddress: ");
-                scanf("%s", &customer.address);
-                printf("\tPhone: ");
-                scanf("%d", &customer.phone);
-                printf("\tEmail: ");
-                scanf("%s", &customer.email);
                 fclose(customerDB);
-                // customerDB = fopen("customerDB.txt", "w");
-                /*
-                TODO: update the database
-                */
+                customerUpdate();
+                goto Addpkg;
             }
             else
             {
@@ -162,21 +184,21 @@ void checkIn()
         }
     }
     printf("\n\tCustomer is not in the database.\n");
-    fclose(customerDB);
     printf("\tEnter customer details:\n");
     printf("\tName: ");
     scanf("%s", &customer.name);
     printf("\tAddress: ");
     scanf("%s", &customer.address);
     printf("\tPhone: ");
-    scanf("%d", &customer.phone);
+    scanf("%s", &customer.phone);
     printf("\tEmail: ");
     scanf("%s", &customer.email);
-
-    customerDB = fopen("customerDB.txt", "a");
-    fprintf(customerDB, "%d : %s : %s : %d : %s\n", customer.nic, customer.name, customer.address, customer.phone, customer.email);
+    fprintf(customerDB, "%s,%s,%s,%s,%s\n", customer.nic, customer.name, customer.address, customer.phone, customer.email);
+    fclose(customerDB);
 
 Addpkg:
+    system("cls");
+    printf("\n\tEnter package details:\n");
     printf("\n\t[1]: Room booking\n");
     printf("\t[2]: Dining\n");
     printf("\n\tChoose: ");
@@ -186,7 +208,7 @@ Addpkg:
     {
     case 1:
         // handle room booking
-        roomBooking(customer.nic);
+        roomBooking();
         break;
     case 2:
         // handle dining
@@ -197,7 +219,7 @@ Addpkg:
     }
 }
 
-int roomBooking(int nic)
+int roomBooking()
 {
     char choice;
     int suiteChoice;
@@ -272,11 +294,12 @@ roomBooking:
     FILE *bookingDB = fopen("bookingDB.txt", "a");
     printf("How long do you wish to stay: ");
     scanf("%d", &days);
-    fprintf(bookingDB, "%d : %s : %d : %.2f\n", nic, suites[suiteChoice - 1], days, suitePrices[suiteChoice - 1] * days);
+    fprintf(bookingDB, "%d : %s : %d : %.2f\n", customer.nic, suites[suiteChoice - 1], days, suitePrices[suiteChoice - 1] * days);
 }
 
 int main()
 {
+    checkIn();
     welcomeMsg();
     int loginChoice = loginScrn();
 
