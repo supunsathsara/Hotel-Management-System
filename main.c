@@ -177,7 +177,6 @@ void checkIn()
             {
                 printf("\n\tCustomer details not updated.\n");
                 fclose(customerDB);
-                // customerDB = fopen("customerDB.txt", "w");
             }
             goto Addpkg;
             break;
@@ -245,7 +244,7 @@ roomBooking:
         scanf(" %c", &choice);
         if (choice == 'Y' || choice == 'y')
         {
-            printf("\n\tBooking successful.\n");
+            printf("\n\t%s Choosen\n", suites[suiteChoice - 1]);
         }
         else
         {
@@ -262,7 +261,7 @@ roomBooking:
         scanf(" %c", &choice);
         if (choice == 'Y' || choice == 'y')
         {
-            printf("\n\tBooking successful.\n");
+            printf("\n\t%s Choosen\n", suites[suiteChoice - 1]);
         }
         else
         {
@@ -278,7 +277,7 @@ roomBooking:
         scanf(" %c", &choice);
         if (choice == 'Y' || choice == 'y')
         {
-            printf("\n\tBooking successful.\n");
+            printf("\n\t%s Choosen\n", suites[suiteChoice - 1]);
         }
         else
         {
@@ -291,15 +290,87 @@ roomBooking:
     }
 
     int days;
-    FILE *bookingDB = fopen("bookingDB.txt", "a");
+    FILE *bookingDB = fopen("bookingDB.csv", "a");
     printf("How long do you wish to stay: ");
     scanf("%d", &days);
-    fprintf(bookingDB, "%d : %s : %d : %.2f\n", customer.nic, suites[suiteChoice - 1], days, suitePrices[suiteChoice - 1] * days);
+    fprintf(bookingDB, "%s,%s,%d,%.2f,%.2f\n", customer.nic, suites[suiteChoice - 1], days, suitePrices[suiteChoice - 1], suitePrices[suiteChoice - 1] * days);
+    fclose(bookingDB);
+    printf("\n\tBooking successful.\n");
+}
+
+void bookingUpdate()
+{
+    FILE *bookingDB = fopen("bookingDB.csv", "a+");
+    FILE *tempDB = fopen("tempDB.csv", "w");
+    int choice;
+    struct bookingData
+    {
+        char nic[20];
+        char suite[25];
+        int days;
+        float price;
+        float total;
+    } booking, fbooking;
+    printf("\n\t\tUpdate booking details\n");
+    printf("\tEnter NIC or Passport Number: ");
+    scanf("%s", &booking.nic);
+    while (feof(bookingDB) == 0)
+    {
+        fscanf(bookingDB, "%12[^,],%24[^,],%d,%f,%f\n", &fbooking.nic, &fbooking.suite, &fbooking.days, &fbooking.price, &fbooking.total);
+        fflush(stdin);
+        if (strcmp(booking.nic, fbooking.nic) == 0)
+        {
+            printf("\n\t\tBooking found.\n");
+            printf("\tNIC: %s\n", fbooking.nic);
+            printf("\tSuite Type: %s\n", fbooking.suite);
+            printf("\tBooked Days: %d\n", fbooking.days);
+            printf("\tPrice: %.2f\n", fbooking.price);
+            printf("\tTotal: %.2f\n", fbooking.total);
+            printf("\n\tDo you want to update the details? [Y/N]: ");
+            char choice;
+            scanf(" %c", &choice);
+            if (choice == 'Y' || choice == 'y')
+            {
+                printf("\n\tEnter new details:\n");
+                printf("\tNIC: ");
+                scanf("%s", &booking.nic);
+                printf("\n\t[1]: Presidential suite \t %.2f /night \t 02\n", suitePrices[0]);
+                printf("\t[2]: Royal suite \t\t %.2f /night \t 03\n", suitePrices[1]);
+                printf("\t[3]: Family suite \t\t %.2f /night \t 05\n", suitePrices[2]);
+                printf("\tSuite: ");
+                scanf("%d", &choice);
+                printf("\tBooked Days: ");
+                scanf("%d", &booking.days);
+                booking.price = suitePrices[choice - 1];
+                strcpy(booking.suite, suites[choice - 1]);
+                booking.total = booking.price * booking.days;
+                printf("\tSuite Price: %.2f\n", booking.price);
+                printf("\ttotal: %.2f", booking.total);
+                fprintf(tempDB, "%s,%s,%d,%.2f,%.2f\n", booking.nic, booking.suite, booking.days, booking.price, booking.total);
+                printf("\n\n\tBooking updated.\n");
+            }
+            else
+            {
+                fprintf(tempDB, "%s,%s,%d,%.2f,%.2f\n", fbooking.nic, fbooking.suite, fbooking.days, fbooking.price, fbooking.total);
+                printf("\n\tBooking details not updated.\n");
+            }
+            // goto Addpkg;
+        }
+        else
+        {
+            fprintf(tempDB, "%s,%s,%d,%.2f,%.2f\n", fbooking.nic, fbooking.suite, fbooking.days, fbooking.price, fbooking.total);
+        }
+    }
+    fclose(bookingDB);
+    fclose(tempDB);
+    remove("bookingDB.csv");
+    rename("tempDB.csv", "bookingDB.csv");
 }
 
 int main()
 {
-    checkIn();
+    bookingUpdate();
+    // checkIn();
     welcomeMsg();
     int loginChoice = loginScrn();
 
@@ -316,12 +387,15 @@ int main()
             case 1:
                 // Check In
                 checkIn();
+                goto receptionistLogin;
                 break;
             case 2:
                 // Check Out
                 break;
             case 3:
                 // Update
+                bookingUpdate();
+                goto receptionistLogin;
                 break;
             case 4:
                 // Exit
