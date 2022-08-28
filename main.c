@@ -18,6 +18,8 @@ char *suites[3] = {"Precedential Suite", "Royal Suite", "Family Suite"};
 float suitePrices[3] = {10999, 8499, 5999}; // Precedential Suite, Royal Suite, Family Suite
 int roomBooking();
 
+#define BILL_CMD "cd /D \"C:\\Windows\\System32\" & rundll32.exe mshtml.dll,PrintHTML \"F:\\Dev\\C\\Hotel Managment System\\bill.txt\""
+
 void header()
 {
     printf("\t\t\t ABC HOTEL\n");
@@ -367,10 +369,98 @@ void bookingUpdate()
     rename("tempDB.csv", "bookingDB.csv");
 }
 
+void checkOut()
+{
+    FILE *bookingDB = fopen("bookingDB.csv", "a+");
+    FILE *tempDB = fopen("tempDB.csv", "w");
+    int choice;
+    int found = 0;
+    struct bookingData
+    {
+        char nic[20];
+        char suite[25];
+        int days;
+        float price;
+        float total;
+    } booking, fbooking;
+checkOut:
+    printf("\n\t\tCheckout\n");
+    printf("\tEnter NIC or Passport Number: ");
+    scanf("%s", &booking.nic);
+    while (feof(bookingDB) == 0)
+    {
+        fscanf(bookingDB, "%12[^,],%24[^,],%d,%f,%f\n", &fbooking.nic, &fbooking.suite, &fbooking.days, &fbooking.price, &fbooking.total);
+        fflush(stdin);
+        if (strcmp(booking.nic, fbooking.nic) == 0)
+        {
+            found = 1;
+            printf("\n\t\tBooking found.\n");
+            printf("\tNIC: %s\n", fbooking.nic);
+            printf("\tSuite Type: %s\n", fbooking.suite);
+            printf("\tBooked Days: %d\n", fbooking.days);
+            printf("\tPrice: %.2f\n", fbooking.price);
+            printf("\n\tYour Total is: %.2f\n", fbooking.total);
+            printf("\n\tDo you want to checkout? [Y/N]: ");
+            char choice;
+            scanf(" %c", &choice);
+            if (choice == 'Y' || choice == 'y')
+            {
+                printf("\n\tCheckout successful.\n");
+                FILE *bill = fopen("bill.txt", "w");
+                time_t t = time(NULL);
+                fprintf(bill, "\t\tHOTEL ABC\n");
+                fprintf(bill, "\tCheckout Date & time: %s\n\n", ctime(&t));
+                fprintf(bill, "NIC: %s\n", fbooking.nic);
+                fprintf(bill, "Suite Type: %s\n", fbooking.suite);
+                fprintf(bill, "Booked Days: %d\n", fbooking.days);
+                fprintf(bill, "Price: %.2f\n", fbooking.price);
+                fprintf(bill, "----------------\n");
+                fprintf(bill, "Total: %.2f\n", fbooking.total);
+                fprintf(bill, "----------------\n\n");
+                fprintf(bill, "Thank you for choosing us.\nHave a nice day.\n");
+                fclose(bill);
+                printf("\n\tPrinting the bill....\n");
+
+                // system("cd /D \"C:\\Windows\\System32\" & rundll32.exe mshtml.dll,PrintHTML \"%s\\bill.txt\"", PATH);
+                system(BILL_CMD);
+                system("pause");
+                system("cls");
+            }
+            else
+            {
+                fprintf(tempDB, "%s,%s,%d,%.2f,%.2f\n", fbooking.nic, fbooking.suite, fbooking.days, fbooking.price, fbooking.total);
+                printf("\n\tBooking details not updated.\n");
+            }
+
+            // goto Addpkg;
+        }
+        else
+        {
+            fprintf(tempDB, "%s,%s,%d,%.2f,%.2f\n", fbooking.nic, fbooking.suite, fbooking.days, fbooking.price, fbooking.total);
+        }
+    }
+    if (found == 0)
+    {
+        printf("\n\t\tBooking not found.\n");
+        printf("\tDo you want to search again? [Y/N]: ");
+        char choice;
+        scanf(" %c", &choice);
+        if (choice == 'Y' || choice == 'y')
+        {
+            system("cls");
+            goto checkOut;
+        }
+    }
+    fclose(bookingDB);
+    fclose(tempDB);
+    remove("bookingDB.csv");
+    remove("bill.txt");
+    rename("tempDB.csv", "bookingDB.csv");
+}
+
 int main()
 {
-    bookingUpdate();
-    // checkIn();
+    checkOut();
     welcomeMsg();
     int loginChoice = loginScrn();
 
@@ -391,6 +481,8 @@ int main()
                 break;
             case 2:
                 // Check Out
+                checkOut();
+                goto receptionistLogin;
                 break;
             case 3:
                 // Update
