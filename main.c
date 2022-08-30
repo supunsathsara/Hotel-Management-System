@@ -75,20 +75,25 @@ int loginScrn()
 
 int receptionistLogin()
 {
-    int Rid, fRid;
+    // char Rid[10], fRid[10];
+    // char pass[10], fpass[10];
+    struct logins
+    {
+        char id[11];
+        char pass[11];
+    } receptionist, freceptionist;
     int LoginSuccess = 0; // 0 = false, 1 = true
-    char pass[10], fpass[10];
-    FILE *db = fopen("db.txt", "r");
+    FILE *db = fopen("logins.env", "r");
     header();
     printf("\n\t\tReceptionist Login\n\n");
     printf("\tEnter Login ID: ");
-    scanf("%d", &Rid);
+    scanf("%s", &receptionist.id);
     printf("\n\tEnter Password: ");
-    scanf("%s", pass);
+    scanf("%s", &receptionist.pass);
     while (!feof(db))
     {
-        fscanf(db, "%d:%s", &fRid, &fpass);
-        if (Rid == fRid && strcmp(pass, fpass) == 0)
+        fscanf(db, "%10[^=]=%10[^\n]\n", &freceptionist.id, &freceptionist.pass);
+        if (strcmp(receptionist.id, freceptionist.id) == 0 && strcmp(receptionist.pass, freceptionist.pass) == 0)
         {
             return 1;
         }
@@ -104,8 +109,9 @@ int receptionistScrn()
 
     printf("\t\t[1]: Check In\n");
     printf("\t\t[2]: Check Out\n");
-    printf("\t\t[3]: Update\n");
-    printf("\t\t[4]: Exit\n");
+    printf("\t\t[3]: Dining\n");
+    printf("\t\t[4]: Update\n");
+    printf("\t\t[5]: Exit\n");
     printf("\t\tEnter your choice: ");
     scanf("%d", &choice);
     return choice;
@@ -115,9 +121,9 @@ void customerUpdate()
 {
     printf("\n\tEnter new details:\n");
     printf("\tName: ");
-    scanf("%s", &customer.name);
+    scanf("%[^\n]%*c", &customer.name);
     printf("\tAddress: ");
-    scanf("%s", &customer.address);
+    scanf("%[^\n]%*c", &customer.address);
     printf("\tPhone: ");
     scanf("%s", &customer.phone);
     printf("\tEmail: ");
@@ -187,9 +193,9 @@ void checkIn()
     printf("\n\tCustomer is not in the database.\n");
     printf("\tEnter customer details:\n");
     printf("\tName: ");
-    scanf("%s", &customer.name);
+    scanf("%[^\n]%*c", &customer.name);
     printf("\tAddress: ");
-    scanf("%s", &customer.address);
+    scanf("%[^\n]%*c", &customer.address);
     printf("\tPhone: ");
     scanf("%s", &customer.phone);
     printf("\tEmail: ");
@@ -199,25 +205,7 @@ void checkIn()
 
 Addpkg:
     system("cls");
-    printf("\n\tEnter package details:\n");
-    printf("\n\t[1]: Room booking\n");
-    printf("\t[2]: Dining\n");
-    printf("\n\tChoose: ");
-    int pkgchoice;
-    scanf("%d", &pkgchoice);
-    switch (pkgchoice)
-    {
-    case 1:
-        // handle room booking
-        roomBooking();
-        break;
-    case 2:
-        // handle dining
-        break;
-    default:
-        printf("\n\tInvalid choice.\n");
-        goto Addpkg;
-    }
+    roomBooking();
 }
 
 int roomBooking()
@@ -458,9 +446,324 @@ checkOut:
     rename("tempDB.csv", "bookingDB.csv");
 }
 
+void dining()
+{
+    system("cls");
+    header();
+    int menuChoice, QTY, orderCount = 0, drinksOrderCount = 0;
+    float totalPrice = 0;
+    int choosenFromBreakfast = 0, choosenFromLunch = 0, choosenFromDinner = 0, choosenFromDrinks = 0;
+    int *order, *orderQTY, *drinksOrder, *drinksQTY;
+    order = (int *)calloc(1, sizeof(int));
+    orderQTY = (int *)calloc(1, sizeof(int));
+    drinksOrder = (int *)calloc(1, sizeof(int));
+    drinksQTY = (int *)calloc(1, sizeof(int));
+    char *breakfastMenu[] = {"Breakfast",
+                             "Pancakes",
+                             "Waffles",
+                             "Omelette",
+                             "noodles",
+                             "eggs"};
+    float breakfastPrice[] = {0, 65.0, 50, 44.99, 59.99, 69.99};
+
+    char *lunchMenu[] = {"Lunch",
+                         "Rice",
+                         "Noodles",
+                         "Pizza",
+                         "Burger",
+                         "Sandwich"};
+    float lunchPrice[] = {0, 165.0, 150, 244.99, 109.99, 69.99};
+
+    char *dinnerMenu[] = {"Dinner",
+                          "Rice",
+                          "Noodles",
+                          "Pizza",
+                          "Pasta",
+                          "Rotti"};
+    float dinnerPrice[] = {0, 165.0, 150, 244.99, 129.00, 5.59};
+
+    char *drinksMenu[] = {"Drinks",
+                          "Coke",
+                          "Fanta",
+                          "Sprite",
+                          "Water",
+                          "Coffee"};
+    float drinksPrice[] = {0, 55.0, 52.0, 50.0, 15.0, 20.0};
+diningMenu:
+    printf("\n\t\tDining\n");
+    printf("\t1. Breakfast\n");
+    printf("\t2. Lunch\n");
+    printf("\t3. Dinner\n");
+    printf("\t4. Drinks\n");
+    printf("\t5. Back\n");
+    printf("\t6. Confirm\n");
+    printf("\tyour choice: ");
+    scanf("%d", &menuChoice);
+    system("cls");
+    switch (menuChoice)
+    {
+    case 1:
+    // breakfast();
+    breakfastMenu:
+        printf("\n\t\tBreakfast\n");
+        for (int i = 1; i < 6; i++)
+        {
+            printf("\t%d. %s \t\t %.2f\n", i, breakfastMenu[i], breakfastPrice[i]);
+        }
+        printf("\t6. Back\n");
+        printf("\t0. Confirm\n");
+        printf("\tEnter your order one by one: \n");
+        for (int i = 0; i >= 0; i++)
+        {
+            printf("\t\tOrder=> ");
+            scanf("%d", &menuChoice);
+            if (menuChoice == 6)
+            {
+                system("cls");
+                orderCount = 0;
+                // free(order);
+                goto diningMenu;
+            }
+            else if (menuChoice == 0)
+            {
+                choosenFromBreakfast = 1;
+                system("cls");
+                // break;
+                goto drinksMenu;
+            }
+            else if (menuChoice > 0 && menuChoice < 6)
+            {
+                orderQTY = (int *)realloc(orderQTY, (i + 1) * sizeof(int));
+                order = realloc(order, (i + 1) * sizeof(int));
+                printf("\t\tQTY=> ");
+                scanf("%d", &orderQTY[i]);
+                order[i] = menuChoice;
+                printf("\n");
+                orderCount++;
+            }
+            else
+            {
+                printf("\tInvalid choice.\n");
+                i--;
+                goto breakfastMenu;
+            }
+        }
+        break;
+    case 2:
+        // lunch();
+    lunchMenu:
+        printf("\n\t\tLunch\n");
+        for (int i = 1; i < 6; i++)
+        {
+            printf("\t%d. %s \t\t %.2f\n", i, lunchMenu[i], lunchPrice[i]);
+        }
+        printf("\t6. Back\n");
+        printf("\t0. Confirm\n");
+        printf("\tEnter your order one by one: \n");
+        for (int i = 0; i >= 0; i++)
+        {
+            printf("\t\tOrder=> ");
+            scanf("%d", &menuChoice);
+            if (menuChoice == 6)
+            {
+                system("cls");
+                orderCount = 0;
+                // free(order);
+                goto diningMenu;
+            }
+            else if (menuChoice == 0)
+            {
+                choosenFromLunch = 1;
+                system("cls");
+                // break;
+                goto drinksMenu;
+            }
+            else if (menuChoice > 0 && menuChoice < 6)
+            {
+
+                orderQTY = (int *)realloc(orderQTY, (i + 1) * sizeof(int));
+                order = realloc(order, (i + 1) * sizeof(int));
+                printf("\t\tQTY=> ");
+                scanf("%d", &orderQTY[i]);
+                order[i] = menuChoice;
+                printf("\n");
+                orderCount++;
+            }
+            else
+            {
+                printf("\tInvalid choice.\n");
+                i--;
+                goto lunchMenu;
+            }
+        }
+        break;
+    case 3:
+        // dinner();
+    dinnerMenu:
+        printf("\n\t\tDinner\n");
+        for (int i = 1; i < 6; i++)
+        {
+            printf("\t%d. %s \t\t %.2f\n", i, dinnerMenu[i], dinnerPrice[i]);
+        }
+        printf("\t6. Back\n");
+        printf("\t0. Confirm\n");
+        printf("\tEnter your order one by one: \n");
+        for (int i = 0; i >= 0; i++)
+        {
+            printf("\t\tOrder=> ");
+            scanf("%d", &menuChoice);
+            if (menuChoice == 6)
+            {
+                system("cls");
+                orderCount = 0;
+                // free(order);
+                goto diningMenu;
+            }
+            else if (menuChoice == 0)
+            {
+                choosenFromDinner = 1;
+                system("cls");
+                // break;
+                goto drinksMenu;
+            }
+            else if (menuChoice > 0 && menuChoice < 6)
+            {
+
+                orderQTY = realloc(orderQTY, (i + 1) * sizeof(int));
+                order = realloc(order, (i + 1) * sizeof(int));
+                printf("\t\tQTY=> ");
+                scanf("%d", &orderQTY[i]);
+                order[i] = menuChoice;
+                printf("\n");
+                orderCount++;
+            }
+            else
+            {
+                printf("\tInvalid choice.\n");
+                i--;
+                goto dinnerMenu;
+            }
+        }
+        break;
+    case 4:
+        goto chooseDrinks;
+    // drinks();
+    drinksMenu:
+        printf("Do you want to order drinks? [Y/N]: ");
+        char choice;
+        scanf(" %c", &choice);
+        if (choice == 'Y' || choice == 'y')
+        {
+        chooseDrinks:
+            system("cls");
+            printf("\n\t\tDrinks\n");
+            for (int i = 1; i < 6; i++)
+            {
+                printf("\t%d. %s \t\t %.2f\n", i, drinksMenu[i], drinksPrice[i]);
+            }
+            printf("\t6. Back\n");
+            printf("\t0. Confirm\n");
+            printf("\tEnter your order one by one: \n");
+            for (int i = 0; i >= 0; i++)
+            {
+                printf("\t\tOrder=> ");
+                scanf("%d", &menuChoice);
+                if (menuChoice == 6)
+                {
+                    system("cls");
+                    drinksOrderCount = 0;
+                    // free(order);
+                    goto diningMenu;
+                }
+                else if (menuChoice == 0)
+                {
+                    choosenFromDrinks = 1;
+                    system("cls");
+                    // break;
+                    goto billing;
+                }
+                else if (menuChoice > 0 && menuChoice < 6)
+                {
+                    drinksOrder = realloc(drinksOrder, (i + 1) * sizeof(int));
+                    drinksOrder[i] = menuChoice;
+                    drinksQTY = realloc(orderQTY, (i + 1) * sizeof(int));
+                    printf("\t\tQTY=> ");
+                    scanf("%d", &drinksQTY[i]);
+                    printf("\n");
+                    drinksOrderCount++;
+                }
+                else
+                {
+                    printf("\tInvalid choice.\n");
+                    i--;
+                    goto chooseDrinks;
+                }
+            }
+        }
+        else
+        {
+            system("cls");
+            goto billing;
+        }
+        break;
+    case 5:
+        system("cls");
+        return;
+    case 6:
+        system("cls");
+        break;
+    }
+billing:
+    printf("\n\t\tYour order:\n\n");
+    if (!choosenFromBreakfast && !choosenFromLunch && !choosenFromDinner && !choosenFromDrinks)
+    {
+        printf("\tNo order.\n");
+        system("pause");
+        goto diningMenu;
+    }
+    else
+    {
+        printf("\t\tOrder \t QTY \t Price \t total\n");
+        if (choosenFromBreakfast)
+        {
+            for (int i = 0; i < orderCount; i++)
+            {
+                printf("\t%d. %s \t%d \t%.2f \t %.2f$\n", i + 1, breakfastMenu[order[i]], orderQTY[i], breakfastPrice[order[i]], breakfastPrice[order[i]] * orderQTY[i]);
+                totalPrice += breakfastPrice[order[i]] * orderQTY[i];
+            }
+        }
+        else if (choosenFromLunch)
+        {
+            for (int i = 0; i < orderCount; i++)
+            {
+                printf("\t%d. %s \t%d \t%.2f \t %.2f$\n", i + 1, lunchMenu[order[i]], orderQTY[i], lunchPrice[order[i]], lunchPrice[order[i]] * orderQTY[i]);
+                totalPrice += lunchPrice[order[i]] * orderQTY[i];
+            }
+        }
+        else if (choosenFromDinner)
+        {
+            for (int i = 0; i < orderCount; i++)
+            {
+                printf("\t%d. %s \t%d \t%.2f \t %.2f$\n", i + 1, dinnerMenu[order[i]], orderQTY[i], dinnerPrice[order[i]], dinnerPrice[order[i]] * orderQTY[i]);
+                totalPrice += dinnerPrice[order[i]] * orderQTY[i];
+            }
+        }
+        if (choosenFromDrinks)
+        {
+            for (int i = 0; i < drinksOrderCount; i++)
+            {
+                printf("\t%d. %s \t%d \t%.2f \t %.2f$\n", orderCount + i, drinksMenu[drinksOrder[i]], drinksQTY[i], drinksPrice[drinksOrder[i]], drinksPrice[drinksOrder[i]] * drinksQTY[i]);
+                totalPrice += drinksPrice[drinksOrder[i]] * drinksQTY[i];
+            }
+        }
+        printf("\t Total price:\t %.2f$\n", totalPrice);
+        system("pause");
+    }
+}
+
 int main()
 {
-    checkOut();
+    // checkOut();
     welcomeMsg();
     int loginChoice = loginScrn();
 
@@ -471,25 +774,33 @@ int main()
         if (receptionistLogin())
         {
             printf("\n\t\tLogin Successful\n");
-            int choice = receptionistScrn();
+            Sleep(500);
+            int choice;
+        receptionistScreen:
+            choice = receptionistScrn();
             switch (choice)
             {
             case 1:
                 // Check In
                 checkIn();
-                goto receptionistLogin;
+                goto receptionistScreen;
                 break;
             case 2:
                 // Check Out
                 checkOut();
-                goto receptionistLogin;
+                goto receptionistScreen;
                 break;
             case 3:
-                // Update
-                bookingUpdate();
-                goto receptionistLogin;
+                // Dining
+                dining();
+                goto receptionistScreen;
                 break;
             case 4:
+                // Update
+                bookingUpdate();
+                goto receptionistScreen;
+                break;
+            case 5:
                 // Exit
                 loginScrn();
                 break;
