@@ -680,7 +680,24 @@ diningMenu:
                     choosenFromDrinks = 1;
                     system("cls");
                     // break;
-                    goto billing;
+                    if (orderCount == 0)
+                    {
+                        printf("Do you want to order anything else? [Y/N]: ");
+                        char choice;
+                        scanf(" %c", &choice);
+                        if (choice == 'Y' || choice == 'y')
+                        {
+                            goto diningMenu;
+                        }
+                        else
+                        {
+                            goto billing;
+                        }
+                    }
+                    else
+                    {
+                        goto billing;
+                    }
                 }
                 else if (menuChoice > 0 && menuChoice < 6)
                 {
@@ -752,7 +769,7 @@ billing:
         {
             for (int i = 0; i < drinksOrderCount; i++)
             {
-                printf("\t%d. %s \t%d \t%.2f \t %.2f$\n", orderCount + i, drinksMenu[drinksOrder[i]], drinksQTY[i], drinksPrice[drinksOrder[i]], drinksPrice[drinksOrder[i]] * drinksQTY[i]);
+                printf("\t%d. %s \t%d \t%.2f \t %.2f$\n", orderCount + i + 1, drinksMenu[drinksOrder[i]], drinksQTY[i], drinksPrice[drinksOrder[i]], drinksPrice[drinksOrder[i]] * drinksQTY[i]);
                 totalPrice += drinksPrice[drinksOrder[i]] * drinksQTY[i];
             }
         }
