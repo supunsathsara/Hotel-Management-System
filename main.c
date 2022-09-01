@@ -75,8 +75,6 @@ int loginScrn()
 
 int receptionistLogin()
 {
-    // char Rid[10], fRid[10];
-    // char pass[10], fpass[10];
     struct logins
     {
         char id[11];
@@ -412,6 +410,7 @@ checkOut:
                 // system("cd /D \"C:\\Windows\\System32\" & rundll32.exe mshtml.dll,PrintHTML \"%s\\bill.txt\"", PATH);
                 system(BILL_CMD);
                 system("pause");
+                remove("bill.txt");
                 system("cls");
             }
             else
@@ -521,7 +520,9 @@ diningMenu:
             {
                 system("cls");
                 orderCount = 0;
-                // free(order);
+                free(order);
+                int *order;
+                order = (int *)calloc(1, sizeof(int));
                 goto diningMenu;
             }
             else if (menuChoice == 0)
@@ -568,7 +569,9 @@ diningMenu:
             {
                 system("cls");
                 orderCount = 0;
-                // free(order);
+                free(order);
+                int *order;
+                order = (int *)calloc(1, sizeof(int));
                 goto diningMenu;
             }
             else if (menuChoice == 0)
@@ -616,7 +619,9 @@ diningMenu:
             {
                 system("cls");
                 orderCount = 0;
-                // free(order);
+                free(order);
+                int *order;
+                order = (int *)calloc(1, sizeof(int));
                 goto diningMenu;
             }
             else if (menuChoice == 0)
@@ -661,7 +666,7 @@ diningMenu:
             {
                 printf("\t%d. %s \t\t %.2f\n", i, drinksMenu[i], drinksPrice[i]);
             }
-            printf("\t6. Back\n");
+            printf("\t6. Reset\n");
             printf("\t0. Confirm\n");
             printf("\tEnter your order one by one: \n");
             for (int i = 0; i >= 0; i++)
@@ -672,7 +677,9 @@ diningMenu:
                 {
                     system("cls");
                     drinksOrderCount = 0;
-                    // free(order);
+                    free(drinksOrder);
+                    int *drinksOrder;
+                    drinksOrder = (int *)calloc(1, sizeof(int));
                     goto diningMenu;
                 }
                 else if (menuChoice == 0)
@@ -774,7 +781,90 @@ billing:
             }
         }
         printf("\t Total price:\t %.2f$\n", totalPrice);
-        system("pause");
+        printf("\n\n\t\t[1]: Confirm\n\t\t[2]: Edit\n");
+        printf("\t\tChoice: ");
+        scanf("%d", &menuChoice);
+        switch (menuChoice)
+        {
+        case 1:
+            // handle confirmation
+            printf("\n\tPrinting receipt...\n");
+            FILE *bill = fopen("bill.txt", "a");
+            time_t t = time(NULL);
+            fprintf(bill, "\t\tHOTEL ABC\n");
+            fprintf(bill, "\t\t %s\n\n", ctime(&t));
+            fprintf(bill, "\tOrder \t\t QTY \t Price \t total\n");
+            if (choosenFromBreakfast)
+            {
+                for (int i = 0; i < orderCount; i++)
+                {
+                    fprintf(bill, "%d. %s \t%d \t\t%.2f \t %.2f$\n", i + 1, breakfastMenu[order[i]], orderQTY[i], breakfastPrice[order[i]], breakfastPrice[order[i]] * orderQTY[i]);
+                }
+            }
+            else if (choosenFromLunch)
+            {
+                for (int i = 0; i < orderCount; i++)
+                {
+                    fprintf(bill, "%d. %s \t%d \t\t%.2f \t %.2f$\n", i + 1, lunchMenu[order[i]], orderQTY[i], lunchPrice[order[i]], lunchPrice[order[i]] * orderQTY[i]);
+                }
+            }
+            else if (choosenFromDinner)
+            {
+                for (int i = 0; i < orderCount; i++)
+                {
+                    fprintf(bill, "%d. %s \t%d \t\t%.2f \t %.2f$\n", i + 1, dinnerMenu[order[i]], orderQTY[i], dinnerPrice[order[i]], dinnerPrice[order[i]] * orderQTY[i]);
+                }
+            }
+            if (choosenFromDrinks)
+            {
+                for (int i = 0; i < drinksOrderCount; i++)
+                {
+                    fprintf(bill, "%d. %s \t\t%d \t\t%.2f \t %.2f$\n", orderCount + i + 1, drinksMenu[drinksOrder[i]], drinksQTY[i], drinksPrice[drinksOrder[i]], drinksPrice[drinksOrder[i]] * drinksQTY[i]);
+                }
+            }
+            fprintf(bill, "----------------\n");
+            fprintf(bill, " Total price:\t %.2f$\n", totalPrice);
+            fprintf(bill, "----------------\n\n");
+            fprintf(bill, "Thank you for choosing us.\nHave a nice day.\n");
+            fclose(bill);
+            system(BILL_CMD);
+            system("pause");
+            remove("bill.txt");
+            system("cls");
+            break;
+        case 2:
+            // handle edit
+            printf("\n\t\t[1]:Add More\n");
+            printf("\t\t[2]:Remove\n");
+            printf("\t\t[3]:Reset\n");
+            printf("\t\tChoice: ");
+            scanf("%d", &menuChoice);
+            switch (menuChoice)
+            {
+            case 1:
+                system("cls");
+                goto diningMenu;
+                break;
+            case 2:
+                system("cls");
+                // handle remove
+                break;
+            case 3:
+                system("cls");
+                // handle reset
+                break;
+            default:
+                system("cls");
+                goto billing;
+                break;
+            }
+            break;
+        default:
+            printf("\tInvalid choice.\n");
+            goto billing;
+        }
+
+        // system("pause");
     }
 }
 
