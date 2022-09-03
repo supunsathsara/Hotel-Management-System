@@ -22,7 +22,7 @@ int roomBooking();
 
 void header()
 {
-    printf("\t\t\t ABC HOTEL\n");
+    printf("\n\t\t\t ABC HOTEL\n");
 }
 
 void welcomeMsg()
@@ -157,6 +157,8 @@ float getIncome(int month, int year)
         system("pause");
         return 0;
     }
+    printf("\n\n\t Date\t\t Type\t\t Amount\n");
+    printf("\t ----\t\t -----\t\t ------\n\n");
     if (month == 0)
     {
         while (!feof(log))
@@ -165,7 +167,7 @@ float getIncome(int month, int year)
             fflush(stdin);
             if (date.year == year)
             {
-                printf("%d/%s/%d %s %.2f\n", date.date, date.month, date.year, transactionType, amount);
+                printf("\t%d/%s/%d %s %.2f\n", date.date, date.month, date.year, transactionType, amount);
                 income += amount;
             }
         }
@@ -178,7 +180,7 @@ float getIncome(int month, int year)
             fflush(stdin);
             if (date.year == year && strcmp(date.month, months[month]) == 0)
             {
-                printf("%d/%s/%d \t %s \t %.2f\n", date.date, date.month, date.year, transactionType, amount);
+                printf("\t%d/%s/%d \t %s \t %.2f\n", date.date, date.month, date.year, transactionType, amount);
                 income += amount;
             }
         }
@@ -225,20 +227,29 @@ checkIncome:
         scanf("%d", &year);
         printf("Enter month (0 to check all): ");
         scanf("%d", &month);
-        total = getIncome(month, year);
+        if (month >= 0 && month <= 12)
+        {
+            total = getIncome(month, year);
+        }
+        else
+        {
+            printf("invalid month");
+            system("pause");
+            goto checkIncome;
+        }
         break;
     default:
         printf("Invalid choice.\n");
         goto checkIncome;
         break;
     }
-    if (total == 0)
+    if (total == 0.00)
     {
-        printf("No data found.\n");
+        printf("\n\t\t--- No data found. ---\n\n");
     }
     else
     {
-        printf("Total income: %.2f\n", total);
+        printf("\n\tTotal income: %.2f\n\n", total);
     }
     system("pause");
 }
@@ -720,7 +731,6 @@ checkOut:
                 fclose(bill);
                 printf("\n\tPrinting the bill....\n");
 
-                // system("cd /D \"C:\\Windows\\System32\" & rundll32.exe mshtml.dll,PrintHTML \"%s\\bill.txt\"", PATH);
                 system(BILL_CMD);
                 saveLog(fbooking.total, 1);
                 system("pause");
