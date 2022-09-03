@@ -482,6 +482,28 @@ void checkIn()
     printf("\t\tCheck In\n\n");
     printf("\tEnter customer NIC or passport: ");
     scanf("%s", &customer.nic);
+    // check customer is already booked
+    FILE *bookingDB = fopen("bookingDB.csv", "r");
+    struct bookingData
+    {
+        char nic[20];
+        char suite[25];
+        int days;
+        float price;
+        float total;
+    } booking, fbooking;
+    while (feof(bookingDB) == 0)
+    {
+        fscanf(bookingDB, "%12[^,],%24[^,],%d,%f,%f\n", &fbooking.nic, &fbooking.suite, &fbooking.days, &fbooking.price, &fbooking.total);
+        fflush(stdin);
+        if (strcmp(customer.nic, fbooking.nic) == 0)
+        {
+            printf("\n\tCustomer already booked\n");
+            system("pause");
+            fclose(bookingDB);
+            return;
+        }
+    }
     // read to check if customer is already in the database
     while (feof(customerDB) == 0)
     {
