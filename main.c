@@ -458,7 +458,6 @@ void customerUpdate()
     {
         fscanf(customerDB, "%12[^,],%49[^,],%49[^,],%13[^,],%39[^\n]\n", &fcustomer.nic, &fcustomer.name, &fcustomer.address, &fcustomer.phone, &fcustomer.email);
         fflush(stdin);
-        // fprintf(temp, "%s,%s,%s,%s,%s\n", fcustomer.nic, fcustomer.name, fcustomer.address, fcustomer.phone, fcustomer.email);
         if (strcmp(customer.nic, fcustomer.nic) == 0)
         {
             fprintf(temp, "%s,%s,%s,%s,%s\n", customer.nic, customer.name, customer.address, customer.phone, customer.email);
