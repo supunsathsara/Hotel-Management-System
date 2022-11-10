@@ -1162,7 +1162,7 @@ diningMenu:
         printf("\t%d. Back\n", diningCount.breakfast + 1);
         printf("\t0. Confirm\n");
         printf("\tEnter your order one by one: \n");
-        for (int i = 0; i >= 0; i++)
+        for (int i = orderCount; i >= 0; i++)
         {
         breakfastOrdering:
             printf("\t\tOrder=> ");
@@ -1220,7 +1220,7 @@ diningMenu:
         printf("\t%d. Back\n", diningCount.lunch + 1);
         printf("\t0. Confirm\n");
         printf("\tEnter your order one by one: \n");
-        for (int i = 0; i >= 0; i++)
+        for (int i = orderCount; i >= 0; i++)
         {
         lunchOrdering:
             printf("\t\tOrder=> ");
@@ -1279,7 +1279,7 @@ diningMenu:
         printf("\t%d. Back\n", diningCount.dinner + 1);
         printf("\t0. Confirm\n");
         printf("\tEnter your order one by one: \n");
-        for (int i = 0; i >= 0; i++)
+        for (int i = orderCount; i >= 0; i++)
         {
         dinnerOrdering:
             printf("\t\tOrder=> ");
@@ -1350,7 +1350,7 @@ diningMenu:
             printf("\t%d. Reset\n", diningCount.drinks + 1);
             printf("\t0. Confirm\n");
             printf("\tEnter your order one by one: \n");
-            for (int i = 0; i >= 0; i++)
+            for (int i = drinksOrderCount; i >= 0; i++)
             {
             drinksOrdering:
                 printf("\t\tOrder=> ");
@@ -1638,6 +1638,8 @@ billing:
                 drinksOrder = (int *)calloc(1, sizeof(int));
                 orderQTY = 0;
                 drinksQTY = 0;
+                drinksOrderCount = 0;
+                orderCount = 0;
                 goto diningMenu;
                 break;
             default:
@@ -1658,7 +1660,6 @@ billing:
 int main()
 {
     initMenu();
-    dining();
     welcomeMsg();
     int loginChoice;
 login:
