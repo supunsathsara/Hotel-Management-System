@@ -215,8 +215,14 @@ int managerLogin()
     header();
     printf("\n\t\tManager Login\n\n");
     strcpy(manager.id, "00000");
+    printf("\tEnter 0 to go back\n\n");
     printf("\n\tEnter Password: ");
+
     scanf("%s", &manager.pass);
+    if (strcmp(manager.pass, "0") == 0)
+    {
+        return 0;
+    }
     while (!feof(db))
     {
         fscanf(db, "%10[^=]=%10[^\n]\n", &fmanager.id, &fmanager.pass);
@@ -732,8 +738,13 @@ int receptionistLogin()
     FILE *db = fopen("logins.env", "r");
     header();
     printf("\n\t\tReceptionist Login\n\n");
+    printf("\tEnter 0 to go back\n\n");
     printf("\tEnter Login ID: ");
     scanf("%s", &receptionist.id);
+    if (strcmp(receptionist.id, "0") == 0)
+    {
+        return 0;
+    }
     printf("\n\tEnter Password: ");
     scanf("%s", &receptionist.pass);
     while (!feof(db))
@@ -1392,7 +1403,7 @@ diningMenu:
                     }
                     drinksOrder = realloc(drinksOrder, (i + 1) * sizeof(int));
                     drinksOrder[i] = menuChoice;
-                    drinksQTY = realloc(orderQTY, (i + 1) * sizeof(int));
+                    drinksQTY = realloc(drinksQTY, (i + 1) * sizeof(int));
                     printf("\t\tQTY=> ");
                     scanf("%d", &drinksQTY[i]);
                     printf("\n");
@@ -1420,6 +1431,7 @@ diningMenu:
         break;
     }
 billing:
+
     printf("\n\t\tYour order:\n\n");
     if (!choosenFromBreakfast && !choosenFromLunch && !choosenFromDinner && !choosenFromDrinks)
     {
@@ -1624,6 +1636,8 @@ billing:
                 free(drinksOrder);
                 int *drinksOrder;
                 drinksOrder = (int *)calloc(1, sizeof(int));
+                orderQTY = 0;
+                drinksQTY = 0;
                 goto diningMenu;
                 break;
             default:
@@ -1644,6 +1658,7 @@ billing:
 int main()
 {
     initMenu();
+    dining();
     welcomeMsg();
     int loginChoice;
 login:
@@ -1698,11 +1713,22 @@ login:
 
             system("color 04");
             printf("\n\t\tLogin Failed\n");
-            printf("\n\t\tPlease try again\n");
-            system("pause");
-            system("color 0f");
-            system("cls");
-            goto receptionistLogin;
+            printf("Press 0 to go back\n\n");
+            scanf("%d", &loginChoice);
+            if (loginChoice == 0)
+            {
+                system("color 0f");
+                system("cls");
+                goto login;
+            }
+            else
+            {
+                printf("\n\t\tPlease try again\n");
+                system("pause");
+                system("color 0f");
+                system("cls");
+                goto receptionistLogin;
+            }
         }
     }
     // Manager Login
@@ -1752,11 +1778,23 @@ login:
         {
             system("color 04");
             printf("\n\t\tLogin Failed\n");
-            printf("\n\t\tPlease try again\n");
-            system("pause");
-            system("color 0f");
-            system("cls");
-            goto managerLogin;
+            printf("Press 0 to go back\n\n");
+            scanf("%d", &loginChoice);
+            if (loginChoice == 0)
+            {
+                system("color 0f");
+                system("cls");
+                goto login;
+            }
+            else
+            {
+
+                printf("\n\t\tPlease try again\n");
+                system("pause");
+                system("color 0f");
+                system("cls");
+                goto managerLogin;
+            }
         }
     }
     // Exit
