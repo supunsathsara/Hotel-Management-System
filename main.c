@@ -4,6 +4,7 @@
 #include <string.h>
 #include <windows.h>
 
+// region Global Variables
 struct details
 {
     // char nic[10];
@@ -16,9 +17,116 @@ struct details
 } customer, fcustomer;
 char *suites[3] = {"Precedential Suite", "Royal Suite", "Family Suite"};
 float suitePrices[3] = {10999, 8499, 5999}; // Precedential Suite, Royal Suite, Family Suite
-int roomBooking();
+
+// dining vars
+struct diningCount
+{
+    int breakfast;
+    int lunch;
+    int dinner;
+    int drinks;
+} diningCount;
+
+char breakfastMenu[100][100];
+float *breakfastPrice;
+char lunchMenu[100][100];
+float *lunchPrice;
+char dinnerMenu[100][100];
+float *dinnerPrice;
+char drinksMenu[100][100];
+float *drinksPrice;
+
+// Endregion
 
 #define BILL_CMD "cd /D \"C:\\Windows\\System32\" & rundll32.exe mshtml.dll,PrintHTML \"F:\\Dev\\C\\Hotel Managment System\\bill.txt\""
+
+int roomBooking();
+
+void initMenu()
+{
+    struct menu
+    {
+        char type[20];
+        char name[20];
+        float price;
+    } menu;
+    diningCount.breakfast = 0, diningCount.lunch = 0, diningCount.dinner = 0, diningCount.drinks = 0;
+    FILE *fp;
+
+    // init menu price array
+    breakfastPrice = (float *)malloc(diningCount.breakfast * sizeof(float));
+    lunchPrice = (float *)malloc(diningCount.lunch * sizeof(float));
+    dinnerPrice = (float *)malloc(diningCount.dinner * sizeof(float));
+    drinksPrice = (float *)malloc(diningCount.dinner * sizeof(float));
+
+    // add init values
+    strncpy(breakfastMenu[0], "breakfast", 10);
+    breakfastPrice[0] = 0;
+    strncpy(lunchMenu[0], "lunch", 10);
+    lunchPrice[0] = 0;
+    strncpy(dinnerMenu[0], "dinner", 10);
+    dinnerPrice[0] = 0;
+    strncpy(drinksMenu[0], "drinks", 10);
+    drinksPrice[0] = 0;
+
+    fp = fopen("menu.csv", "r");
+    while (!feof(fp))
+    {
+        fscanf(fp, "%[^,],%[^,],%f\n)", menu.type, menu.name, &menu.price);
+        if (strcmp(menu.type, "breakfast") == 0)
+        {
+            diningCount.breakfast++;
+            breakfastPrice = (float *)realloc(breakfastPrice, (diningCount.breakfast + 1) * sizeof(float));
+            strcpy(breakfastMenu[diningCount.breakfast], menu.name);
+            breakfastPrice[diningCount.breakfast] = menu.price;
+        }
+
+        else if (strcmp(menu.type, "lunch") == 0)
+        {
+            diningCount.lunch++;
+            lunchPrice = (float *)realloc(lunchPrice, (diningCount.lunch + 1) * sizeof(float));
+            strcpy(lunchMenu[diningCount.lunch], menu.name);
+            lunchPrice[diningCount.lunch] = menu.price;
+        }
+        else if (strcmp(menu.type, "dinner") == 0)
+        {
+            diningCount.dinner++;
+            dinnerPrice = (float *)realloc(dinnerPrice, (diningCount.dinner + 1) * sizeof(float));
+            strcpy(dinnerMenu[diningCount.dinner], menu.name);
+            dinnerPrice[diningCount.dinner] = menu.price;
+        }
+        else if (strcmp(menu.type, "drinks") == 0)
+        {
+            diningCount.drinks++;
+            drinksPrice = (float *)realloc(drinksPrice, (diningCount.drinks + 1) * sizeof(float));
+            strcpy(drinksMenu[diningCount.drinks], menu.name);
+            drinksPrice[diningCount.drinks] = menu.price;
+        }
+    }
+    fclose(fp);
+    /*
+    for (int i = 0; i < diningCount.breakfast; i++)
+    {
+        printf("%s %.2f\n", breakfastMenu[i], breakfastPrice[i]);
+    }
+    printf("\n\n");
+    for (int i = 0; i < diningCount.lunch; i++)
+    {
+        printf("%s %.2f\n", lunchMenu[i], lunchPrice[i]);
+    }
+    printf("\n\n");
+    for (int i = 0; i < diningCount.dinner; i++)
+    {
+        printf("%s %.2f\n", dinnerMenu[i], dinnerPrice[i]);
+    }
+    printf("\n\n");
+    for (int i = 0; i < diningCount.drinks; i++)
+    {
+        printf("%s %.2f\n", drinksMenu[i], drinksPrice[i]);
+    }
+    */
+    // system("pause");
+}
 
 void header()
 {
@@ -80,9 +188,11 @@ int loginScrn()
 
     // condition ? true : false;
     login == 3 ? exit(1) : system("cls");
+
     if (login != 1 && login != 2)
     {
         printf("Invalid login type.\n");
+        printf("Try Again...");
         Sleep(300);
         system("cls");
         loginScrn();
@@ -128,7 +238,8 @@ int managerScrn()
     printf("\t\t[2]: Update Logins\n");
     printf("\t\t[3]: View Room Bookings\n");
     printf("\t\t[4]: Customer Update\n");
-    printf("\t\t[5]: Exit\n");
+    printf("\t\t[5]: Menu Update\n");
+    printf("\t\t[6]: Exit\n");
     printf("\t\tEnter your choice: ");
     scanf("%d", &choice);
     return choice;
@@ -395,6 +506,219 @@ void viewRoomBookings()
     system("pause");
     fclose(bookingDB);
     system("cls");
+}
+
+void viewFullMenu()
+{
+    printf("\t\tBreakfast Menu\n");
+    for (int i = 1; i <= diningCount.breakfast; i++)
+    {
+        printf("\t%d. %s \t\t %.2f\n", i, breakfastMenu[i], breakfastPrice[i]);
+    }
+    printf("\t\tLunch Menu\n");
+    for (int i = 1; i <= diningCount.lunch; i++)
+    {
+        printf("\t%d. %s \t\t %.2f\n", i, lunchMenu[i], lunchPrice[i]);
+    }
+    printf("\t\tDinner Menu\n");
+    for (int i = 1; i <= diningCount.dinner; i++)
+    {
+        printf("\t%d. %s \t\t %.2f\n", i, dinnerMenu[i], dinnerPrice[i]);
+    }
+    printf("\t\tDrinks Menu\n");
+    for (int i = 1; i <= diningCount.drinks; i++)
+    {
+        printf("\t%d. %s \t\t %.2f\n", i, drinksMenu[i], drinksPrice[i]);
+    }
+}
+
+void resetMenu()
+{
+    // reset menu counts
+    diningCount.breakfast = 0;
+    diningCount.lunch = 0;
+    diningCount.dinner = 0;
+    diningCount.drinks = 0;
+
+    // initialize menu arrays
+    initMenu();
+}
+void updateMenu()
+{
+    int choice;
+    FILE *menu;
+    FILE *temp;
+    struct menu
+    {
+        char type[20];
+        char item[25];
+        float price;
+    } fmenu, menuData;
+updateMenu:
+    system("cls");
+    resetMenu();
+    // viewFullMenu();
+    system("pause");
+    printf("\t\tUpdate Menu\n");
+    printf("\t[1]: Add a new item\n");
+    printf("\t[2]: Delete an item\n");
+    printf("\t[3]: Change an item price\n");
+    printf("\t[4]: go back\n");
+    printf("\t\t =>");
+    scanf("%d", &choice);
+    system("cls");
+    switch (choice)
+    {
+    case 1:
+        // handle adding a new item
+        menu = fopen("menu.csv", "a+");
+        printf("\tSelect item type:");
+        printf("\n\t[1]: Breakfast");
+        printf("\n\t[2]: Lunch");
+        printf("\n\t[3]: Dinner");
+        printf("\n\t[4]: Drinks");
+        printf("\n\t\t =>");
+        scanf("%d", &choice);
+        if (choice == 1)
+        {
+            strcpy(menuData.type, "breakfast");
+        }
+        else if (choice == 2)
+        {
+            strcpy(menuData.type, "lunch");
+        }
+        else if (choice == 3)
+        {
+            strcpy(menuData.type, "dinner");
+        }
+        else if (choice == 4)
+        {
+            strcpy(menuData.type, "drinks");
+        }
+        else
+        {
+            printf("Invalid choice");
+            system("cls");
+            goto updateMenu;
+        }
+        printf("\tEnter item name: ");
+        scanf("%s", &menuData.item);
+
+        // check if item already exists
+        while (feof(menu) == 0)
+        {
+            fscanf(menu, "%19[^,],%24[^,],%f\n", &fmenu.type, &fmenu.item, &fmenu.price);
+            if (strcmp(menuData.item, fmenu.item) == 0 && strcmp(menuData.type, fmenu.type) == 0)
+            {
+                printf("Item already exists\n");
+                printf("\t%s\t%s\t%.2f\n", fmenu.type, fmenu.item, fmenu.price);
+                system("pause");
+                fclose(menu);
+                system("cls");
+                goto updateMenu;
+            }
+        }
+
+        printf("\tEnter item price: ");
+        scanf("%f", &menuData.price);
+
+        fprintf(menu, "%s,%s,%.2f\n", menuData.type, menuData.item, menuData.price);
+        fclose(menu);
+        printf("\nSuccessfully Added the item\n");
+        system("pause");
+        break;
+    case 2:
+        // handle delete
+        viewFullMenu();
+        menu = fopen("menu.csv", "a+");
+        temp = fopen("tempMenu.csv", "a+");
+        printf("\tEnter item name: ");
+        scanf("%s", &menuData.item);
+        while (!feof(menu))
+        {
+            fscanf(menu, "%20[^,],%20[^,],%f\n", &fmenu.type, &fmenu.item, &fmenu.price);
+            if (strcmp(fmenu.item, menuData.item) == 0)
+            {
+                printf("\n%s => %s - %.2f\n", fmenu.type, fmenu.item, fmenu.price);
+                printf("Do you want to delete this item? [y/n] ");
+                char choice;
+                scanf("%s", &choice);
+                if (choice == 'y')
+                {
+                    continue;
+                }
+                else
+                {
+                    fprintf(temp, "%s,%s,%.2f\n", fmenu.type, fmenu.item, fmenu.price);
+                }
+            }
+            else
+            {
+                fprintf(temp, "%s,%s,%.2f\n", fmenu.type, fmenu.item, fmenu.price);
+            }
+        }
+        fclose(menu);
+        fclose(temp);
+        Sleep(500);
+        remove("menu.csv");
+        rename("tempMenu.csv", "menu.csv");
+        printf("\n\nSuccessfully deleted the item\n\n");
+        system("pause");
+        system("cls");
+        break;
+    case 3:
+        // handle menu update
+        menu = fopen("menu.csv", "a+");
+        temp = fopen("tempMenu.csv", "a+");
+        // set seek to start of file
+        fseek(menu, 0, SEEK_SET);
+        printf("\tEnter item name: ");
+        scanf("%s", &menuData.item);
+        printf("\tEnter new price: ");
+        scanf("%f", &menuData.price);
+        while (!feof(menu))
+        {
+            fscanf(menu, "%20[^,],%20[^,],%f\n", &fmenu.type, &fmenu.item, &fmenu.price);
+            if (strcmp(fmenu.item, menuData.item) == 0)
+            {
+                printf("\n%s => %s - %.2f\n", fmenu.type, fmenu.item, fmenu.price);
+                printf("Do you want to update this item? [y/n] ");
+                char choice;
+                scanf(" %c", &choice);
+                if (choice == 'y')
+                {
+                    fprintf(temp, "%s,%s,%.2f\n", fmenu.type, fmenu.item, menuData.price);
+                }
+                else
+                {
+                    fprintf(temp, "%s,%s,%.2f\n", fmenu.type, fmenu.item, fmenu.price);
+                }
+            }
+            else
+            {
+                fprintf(temp, "%s,%s,%.2f\n", fmenu.type, fmenu.item, fmenu.price);
+            }
+        }
+        fclose(menu);
+        fclose(temp);
+        Sleep(200);
+        remove("menu.csv");
+        rename("tempMenu.csv", "menu.csv");
+        printf("\n\nSuccessfully updated the item\n\n");
+        system("pause");
+        system("cls");
+        break;
+    case 4:
+        // handle go back
+        system("cls");
+        return;
+        break;
+    default:
+        printf("Invalid choice");
+        system("cls");
+        goto updateMenu;
+        break;
+    }
 }
 
 int receptionistLogin()
@@ -802,37 +1126,7 @@ void dining()
     orderQTY = (int *)calloc(1, sizeof(int));
     drinksOrder = (int *)calloc(1, sizeof(int));
     drinksQTY = (int *)calloc(1, sizeof(int));
-    char *breakfastMenu[] = {"Breakfast",
-                             "Pancakes",
-                             "Waffles",
-                             "Omelette",
-                             "noodles",
-                             "eggs"};
-    float breakfastPrice[] = {0, 65.0, 50, 44.99, 59.99, 69.99};
 
-    char *lunchMenu[] = {"Lunch",
-                         "Rice",
-                         "Noodles",
-                         "Pizza",
-                         "Burger",
-                         "Sandwich"};
-    float lunchPrice[] = {0, 165.0, 150, 244.99, 109.99, 69.99};
-
-    char *dinnerMenu[] = {"Dinner",
-                          "Rice",
-                          "Noodles",
-                          "Pizza",
-                          "Pasta",
-                          "Rotti"};
-    float dinnerPrice[] = {0, 165.0, 150, 244.99, 129.00, 5.59};
-
-    char *drinksMenu[] = {"Drinks",
-                          "Coke",
-                          "Fanta",
-                          "Sprite",
-                          "Water",
-                          "Coffee"};
-    float drinksPrice[] = {0, 55.0, 52.0, 50.0, 15.0, 20.0};
 diningMenu:
     printf("\n\t\tDining\n");
     printf("\t1. Breakfast\n");
@@ -850,11 +1144,11 @@ diningMenu:
     // breakfast();
     breakfastMenu:
         printf("\n\t\tBreakfast\n");
-        for (int i = 1; i < 6; i++)
+        for (int i = 1; i <= diningCount.breakfast; i++)
         {
             printf("\t%d. %s \t\t %.2f\n", i, breakfastMenu[i], breakfastPrice[i]);
         }
-        printf("\t6. Back\n");
+        printf("\t%d. Back\n", diningCount.breakfast + 1);
         printf("\t0. Confirm\n");
         printf("\tEnter your order one by one: \n");
         for (int i = 0; i >= 0; i++)
@@ -862,7 +1156,7 @@ diningMenu:
         breakfastOrdering:
             printf("\t\tOrder=> ");
             scanf("%d", &menuChoice);
-            if (menuChoice == 6)
+            if (menuChoice == (diningCount.breakfast + 1))
             {
                 system("cls");
                 orderCount = 0;
@@ -878,7 +1172,7 @@ diningMenu:
                 // break;
                 goto drinksMenu;
             }
-            else if (menuChoice > 0 && menuChoice < 6)
+            else if (menuChoice > 0 && menuChoice < (diningCount.breakfast + 1))
             {
                 if (order[i] == menuChoice)
                 {
@@ -908,11 +1202,11 @@ diningMenu:
         // lunch();
     lunchMenu:
         printf("\n\t\tLunch\n");
-        for (int i = 1; i < 6; i++)
+        for (int i = 1; i <= diningCount.lunch; i++)
         {
             printf("\t%d. %s \t\t %.2f\n", i, lunchMenu[i], lunchPrice[i]);
         }
-        printf("\t6. Back\n");
+        printf("\t%d. Back\n", diningCount.lunch + 1);
         printf("\t0. Confirm\n");
         printf("\tEnter your order one by one: \n");
         for (int i = 0; i >= 0; i++)
@@ -920,7 +1214,7 @@ diningMenu:
         lunchOrdering:
             printf("\t\tOrder=> ");
             scanf("%d", &menuChoice);
-            if (menuChoice == 6)
+            if (menuChoice == (diningCount.lunch + 1))
             {
                 system("cls");
                 orderCount = 0;
@@ -936,7 +1230,7 @@ diningMenu:
                 // break;
                 goto drinksMenu;
             }
-            else if (menuChoice > 0 && menuChoice < 6)
+            else if (menuChoice > 0 && menuChoice < (diningCount.lunch + 1))
             {
                 if (order[i] == menuChoice)
                 {
@@ -967,11 +1261,11 @@ diningMenu:
         // dinner();
     dinnerMenu:
         printf("\n\t\tDinner\n");
-        for (int i = 1; i < 6; i++)
+        for (int i = 1; i <= diningCount.dinner; i++)
         {
             printf("\t%d. %s \t\t %.2f\n", i, dinnerMenu[i], dinnerPrice[i]);
         }
-        printf("\t6. Back\n");
+        printf("\t%d. Back\n", diningCount.dinner + 1);
         printf("\t0. Confirm\n");
         printf("\tEnter your order one by one: \n");
         for (int i = 0; i >= 0; i++)
@@ -979,7 +1273,7 @@ diningMenu:
         dinnerOrdering:
             printf("\t\tOrder=> ");
             scanf("%d", &menuChoice);
-            if (menuChoice == 6)
+            if (menuChoice == (diningCount.dinner + 1))
             {
                 system("cls");
                 orderCount = 0;
@@ -995,7 +1289,7 @@ diningMenu:
                 // break;
                 goto drinksMenu;
             }
-            else if (menuChoice > 0 && menuChoice < 6)
+            else if (menuChoice > 0 && menuChoice < (diningCount.dinner + 1))
             {
                 if (order[i] == menuChoice)
                 {
@@ -1038,11 +1332,11 @@ diningMenu:
         chooseDrinks:
             system("cls");
             printf("\n\t\tDrinks\n");
-            for (int i = 1; i < 6; i++)
+            for (int i = 1; i <= diningCount.drinks; i++)
             {
                 printf("\t%d. %s \t\t %.2f\n", i, drinksMenu[i], drinksPrice[i]);
             }
-            printf("\t6. Reset\n");
+            printf("\t%d. Reset\n", diningCount.drinks + 1);
             printf("\t0. Confirm\n");
             printf("\tEnter your order one by one: \n");
             for (int i = 0; i >= 0; i++)
@@ -1050,7 +1344,7 @@ diningMenu:
             drinksOrdering:
                 printf("\t\tOrder=> ");
                 scanf("%d", &menuChoice);
-                if (menuChoice == 6)
+                if (menuChoice == (diningCount.drinks + 1))
                 {
                     system("cls");
                     drinksOrderCount = 0;
@@ -1083,7 +1377,7 @@ diningMenu:
                         goto billing;
                     }
                 }
-                else if (menuChoice > 0 && menuChoice < 6)
+                else if (menuChoice > 0 && menuChoice < (diningCount.drinks + 1))
                 {
                     // check to see already added to array
                     for (int i = 0; i < drinksOrderCount; i++)
@@ -1349,6 +1643,7 @@ billing:
 
 int main()
 {
+    initMenu();
     welcomeMsg();
     int loginChoice;
 login:
@@ -1440,6 +1735,10 @@ login:
                 goto managerScreen;
                 break;
             case 5:
+                updateMenu();
+                goto managerScreen;
+                break;
+            case 6:
                 goto login;
                 break;
             default:
