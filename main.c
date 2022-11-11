@@ -104,28 +104,6 @@ void initMenu()
         }
     }
     fclose(fp);
-    /*
-    for (int i = 0; i < diningCount.breakfast; i++)
-    {
-        printf("%s %.2f\n", breakfastMenu[i], breakfastPrice[i]);
-    }
-    printf("\n\n");
-    for (int i = 0; i < diningCount.lunch; i++)
-    {
-        printf("%s %.2f\n", lunchMenu[i], lunchPrice[i]);
-    }
-    printf("\n\n");
-    for (int i = 0; i < diningCount.dinner; i++)
-    {
-        printf("%s %.2f\n", dinnerMenu[i], dinnerPrice[i]);
-    }
-    printf("\n\n");
-    for (int i = 0; i < diningCount.drinks; i++)
-    {
-        printf("%s %.2f\n", drinksMenu[i], drinksPrice[i]);
-    }
-    */
-    // system("pause");
 }
 
 void header()
@@ -450,6 +428,7 @@ updateLogins:
         }
         fclose(logins);
         fclose(temp);
+        Sleep(200);
         remove("logins.env");
         rename("tempLogins.env", "logins.env");
         printf("Success");
@@ -475,6 +454,7 @@ updateLogins:
         }
         fclose(temp);
         fclose(logins);
+        Sleep(200);
         remove("logins.env");
         rename("tempLogins.env", "logins.env");
         printf("Success");
@@ -804,6 +784,7 @@ void customerUpdate()
     }
     fclose(customerDB);
     fclose(temp);
+    Sleep(200);
     remove("customerDB.csv");
     rename("temp.csv", "customerDB.csv");
 }
@@ -1031,6 +1012,7 @@ void bookingUpdate()
     }
     fclose(bookingDB);
     fclose(tempDB);
+    Sleep(200);
     remove("bookingDB.csv");
     rename("tempDB.csv", "bookingDB.csv");
 }
@@ -1120,6 +1102,7 @@ checkOut:
     }
     fclose(bookingDB);
     fclose(tempDB);
+    Sleep(200);
     remove("bookingDB.csv");
     remove("bill.txt");
     rename("tempDB.csv", "bookingDB.csv");
